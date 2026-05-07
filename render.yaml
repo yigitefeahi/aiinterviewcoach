@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: ai-coach-backend
+    runtime: python
+    plan: starter
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-coach-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_MINUTES
+        value: "10080"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: TRANSCRIBE_MODEL
+        value: gpt-4o-mini-transcribe
+      - key: TTS_MODEL
+        value: gpt-4o-mini-tts
+      - key: EMBEDDING_MODEL
+        value: text-embedding-3-small
+      - key: CHROMA_DIR
+        value: ./chroma
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: web
+    name: ai-coach-frontend
+    runtime: node
+    plan: starter
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- -p $PORT -H 0.0.0.0
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE
+        sync: false
+
+databases:
+  - name: ai-coach-db
+    plan: starter

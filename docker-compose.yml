@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: ai-coach-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/chroma:/app/chroma
+      - ./backend/data:/app/data
+      - ./backend/test.db:/app/test.db
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ai-coach-frontend
+    environment:
+      NEXT_PUBLIC_API_BASE: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
